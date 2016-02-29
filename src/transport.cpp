@@ -168,7 +168,7 @@ struct Object3D
 
 	}
 	////////////////////////////////////////////////////////////////
-	void DrawFrame(float extend, bool running = false)
+	void DrawAxis(float extend, bool running = false)
 	{
 		glPushMatrix();
 		glPointSize(3.f);
@@ -345,8 +345,8 @@ int PollKeys()
 		break;
 	}
 	return keyRead;
-
 }
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 int Menu(void)
 {
@@ -410,6 +410,8 @@ int Menu(void)
 
 void DrawFloor()
 {
+	GLboolean texEnabled = glIsEnabled(GL_LIGHTING);
+	glDisable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, floorTexture);
 	glBegin(GL_QUADS);
@@ -425,6 +427,11 @@ void DrawFloor()
 	glVertex3f(0.f, 0.f, WorldHeight);
 	glEnd();
 	glDisable(GL_TEXTURE_2D);
+
+	if (texEnabled)
+		glEnable(GL_LIGHTING);
+	else
+		glDisable(GL_LIGHTING);
 }
 ///////////////////////////////////////////////////////////////
 int timeSpan = 33; // milliseconds
@@ -448,7 +455,7 @@ void renderScene(bool reset)
 
 	// draw the frame and its trace:
 	simBall.DrawTrace();
-	simBall.DrawFrame(2.f, reset);
+	simBall.DrawAxis(2.f, reset);
 	simBall.DrawObject(2.f, reset);
 
 	// draw walls:
@@ -496,15 +503,15 @@ bool checkWindowResize()
 
 void generateFloorTexture()
 {
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
 	/* load pattern for current 2d texture */
 	const int TEXDIM = 256;
 	GLfloat *tex = make_texture(TEXDIM, TEXDIM);
 	glGenTextures(1, &floorTexture);					// Create Texture id
 	glBindTexture(GL_TEXTURE_2D, floorTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, 1, TEXDIM, TEXDIM, 0, GL_RED, GL_FLOAT, tex);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	
 	free(tex);
 
 }
@@ -514,7 +521,7 @@ int Game(void)
 	/* turn on features */
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
-	glEnable(GL_LIGHTING);
+//	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	
 	/* place light 0 in the right place */
